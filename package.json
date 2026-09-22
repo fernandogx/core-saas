@@ -1,0 +1,11 @@
+{
+  "name": "core-saas-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter core-saas-api run start:dev",
+    "build": "pnpm --filter core-saas-api run build",
+    "db:push": "pnpm --filter core-saas-api run prisma:push",
+    "db:seed": "pnpm --filter core-saas-api run prisma:seed"
+  }
+}

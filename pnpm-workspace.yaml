@@ -1,0 +1,14 @@
+packages:
+  - 'core-saas-api'
+  # Futuramente, adicione aqui os outros SaaS:
+  # - 'saas-contabilidade'
+  # - 'saas-rh'
+allowBuilds:
+  '@parcel/watcher': true
+  '@prisma/client': true
+  '@prisma/engines': true
+  bcrypt: true
+  esbuild: true
+  msgpackr-extract: true
+  prisma: true
+  unrs-resolver: true
