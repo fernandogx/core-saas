@@ -1,7 +1,205 @@
-﻿node_modules/
+﻿
+# ============================================================
+
+# CORE-SAAS - Git Ignore
+
+# NestJS / Node.js / pnpm / Prisma / TypeScript
+
+# ============================================================
+
+# ------------------------------------------------------------
+
+# Dependencies
+
+# ------------------------------------------------------------
+
+node_modules/
+.pnpm-store/
+
+# ------------------------------------------------------------
+
+# Build / Compilation
+
+# ------------------------------------------------------------
+
 dist/
+build/
+out/
+*.tsbuildinfo
+
+# ------------------------------------------------------------
+
+# Environment variables / Secrets
+
+# ------------------------------------------------------------
+
 .env
-.env.local
-.prisma/client/
+.env.*
+!.env.example
+
+# ------------------------------------------------------------
+
+# Prisma
+
+# ------------------------------------------------------------
+
+.prisma/
+**/.prisma/
+
+# ------------------------------------------------------------
+
+# Logs
+
+# ------------------------------------------------------------
+
 *.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ------------------------------------------------------------
+
+# Test / Coverage
+
+# ------------------------------------------------------------
+
+coverage/
+.nyc_output/
+
+# ------------------------------------------------------------
+
+# Temporary files
+
+# ------------------------------------------------------------
+
+*.tmp
+*.temp
+*.swp
+*.swo
+*.bak
+*.orig
+
+# ------------------------------------------------------------
+
+# IDE / Editors
+
+# ------------------------------------------------------------
+
+.vscode/
+.idea/
+*.code-workspace
+
+# ------------------------------------------------------------
+
+# Operating System
+
+# ------------------------------------------------------------
+
 .DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ------------------------------------------------------------
+
+# TypeScript / JavaScript tooling
+
+# ------------------------------------------------------------
+
+.eslintcache
+.stylelintcache
+.cache/
+.parcel-cache/
+.turbo/
+
+# ------------------------------------------------------------
+
+# NestJS
+
+# ------------------------------------------------------------
+
+.nest/
+
+# ------------------------------------------------------------
+
+# Debug files
+
+# ------------------------------------------------------------
+
+.npm/
+*.pid
+*.seed
+*.pid.lock
+
+# ------------------------------------------------------------
+
+# Local databases / generated database files
+
+# ------------------------------------------------------------
+
+*.sqlite
+*.sqlite3
+*.db
+
+# ------------------------------------------------------------
+
+# Docker local overrides
+
+# ------------------------------------------------------------
+
+docker-compose.override.yml
+
+# ------------------------------------------------------------
+
+# OS / shell history
+
+# ------------------------------------------------------------
+
+.history/
+
+# ------------------------------------------------------------
+
+# Generated documentation / temporary exports
+
+# ------------------------------------------------------------
+
+*.generated.*
+*.generated.ts
+
+# ------------------------------------------------------------
+
+# Local AI / tool caches
+
+# ------------------------------------------------------------
+
+.ollama/
+.ai/
+
+````
+
+### Um ponto que eu manteria diferente do padrão
+
+Eu **não colocaria `.agents/`, `.claude/`, `.cursor/` ou `.devin/` no `.gitignore`**.
+
+Você aparentemente tem:
+
+```text
+.agents/
+.claude/
+.cursor/
+.devin/
+````
+
+com arquivos `SKILL.md`. Se esses arquivos fazem parte das instruções/agentes utilizados no desenvolvimento do **core-saas**, faz sentido versioná-los no GitHub. Assim eles acompanham o projeto e ficam disponíveis para quem clonar o repositório.
+
+Depois de substituir o `.gitignore`, execute:
+
+```powershell
+git add .gitignore
+git commit -m "Ajusta gitignore"
+git push
+```
+
+E pronto.
