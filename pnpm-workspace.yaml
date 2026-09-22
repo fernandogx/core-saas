@@ -1,5 +1,6 @@
 packages:
   - 'core-saas-api'
+  - 'core-saas-web'
   # Futuramente, adicione aqui os outros SaaS:
   # - 'saas-contabilidade'
   # - 'saas-rh'

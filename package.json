@@ -7,5 +7,14 @@
     "build": "pnpm --filter core-saas-api run build",
     "db:push": "pnpm --filter core-saas-api run prisma:push",
     "db:seed": "pnpm --filter core-saas-api run prisma:seed"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.9.1",
+    "@tanstack/react-query": "^5.103.2",
+    "lucide-react": "^1.47.0",
+    "react-hook-form": "^7.88.0",
+    "recharts": "^3.10.1",
+    "zod": "^4.6.5",
+    "zustand": "^5.0.15"
   }
 }
