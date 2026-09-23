@@ -1,7 +1,7 @@
 # kill-ports.ps1
 # Mata processos nas portas do projeto
 
-$ports = @(3000, 3001, 5435, 6379)
+$ports = @(3000, 3001)
 
 foreach ($port in $ports) {
   $connections = Get-NetTCPConnection -LocalPort $port -ErrorAction SilentlyContinue

@@ -1,5 +1,4 @@
-'use client';
-
+﻿'use client';
 import { LogOut } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
 import { Button } from '@/components/ui/button';
@@ -7,15 +6,11 @@ import { Badge } from '@/components/ui/badge';
 
 export function Header() {
   const { user, logout } = useAuthStore();
-
   return (
     <header className="flex h-16 items-center justify-between border-b bg-card px-6">
       <div>
-        <span className="text-sm text-muted-foreground">
-          Conectado ao Core Admin
-        </span>
+        <span className="text-sm text-muted-foreground">Conectado ao Core Admin</span>
       </div>
-
       <div className="flex items-center gap-4">
         {user && (
           <div className="flex items-center gap-2">

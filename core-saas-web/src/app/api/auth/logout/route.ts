@@ -1,9 +1,7 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 
 export async function POST() {
   const response = NextResponse.json({ message: 'Logout realizado' });
-
-  // Remove o cookie
   response.cookies.set('core_saas_token', '', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -11,6 +9,5 @@ export async function POST() {
     maxAge: 0,
     path: '/',
   });
-
   return response;
 }

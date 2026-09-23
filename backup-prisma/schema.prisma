@@ -1,0 +1,249 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================
+// ENUMS
+// ==========================================
+
+enum UserRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+  WEEKLY
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  BLOCKED
+  CANCELED
+  EXPIRED
+}
+
+enum InvoiceStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELED
+  OVERDUE
+  REFUNDED
+}
+
+enum PaymentMethod {
+  PIX
+  BOLETO
+  CREDIT_CARD
+  DEBIT_CARD
+}
+
+enum WebhookSource {
+  ASAAS
+  // STRIPE (futuro)
+}
+
+enum WebhookStatus {
+  PENDING
+  PROCESSING
+  SUCCESS
+  FAILED
+}
+
+enum BlockAction {
+  BLOCKED
+  UNBLOCKED
+}
+
+// ==========================================
+// MODELS
+// ==========================================
+
+model Application {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  apiKey      String   @unique // Hash da chave
+  webhookUrl  String?  // URL para o Core notificar este SaaS
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  customers   Customer[]
+  products    Product[]
+}
+
+model Customer {
+  id               String   @id @default(uuid())
+  applicationId    String
+  name             String
+  document         String   // CPF ou CNPJ
+  email            String
+  phone            String?
+  asaasCustomerId  String?  @unique // ID espelho no Asaas
+  metadata         Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  application      Application      @relation(fields: [applicationId], references: [id])
+  users            User[]
+  subscriptions    Subscription[]
+  invoices         Invoice[]
+
+  @@unique([applicationId, email])
+  @@index([applicationId])
+}
+
+model User {
+  id            String     @id @default(uuid())
+  customerId    String
+  name          String
+  email         String     @unique
+  passwordHash  String
+  role          UserRole   @default(MEMBER)
+  lastLoginAt   DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @ updatedAt
+
+  customer      Customer             @relation(fields: [customerId], references: [id])
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  applicationId String
+  name        String
+  slug        String
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  application Application @relation(fields: [applicationId], references: [id])
+  plans       Plan[]
+
+  @@unique([applicationId, slug])
+}
+
+model Plan {
+  id              String        @id @default(uuid())
+  productId       String
+  name            String
+  slug            String
+  price           Decimal       @db.Decimal(10, 2)
+  billingCycle    BillingCycle
+  trialDays       Int           @default(0)
+  asaasPlanId     String?       @unique // ID espelho no Asaas (se usar catálogo deles)
+  features        Json?         // Lista de features do plano
+  isActive        Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  product         Product       @relation(fields: [productId], references: [id])
+  subscriptions   Subscription[]
+
+  @@unique([productId, slug])
+}
+
+model Subscription {
+  id                   String             @id @default(uuid())
+  customerId           String
+  planId               String
+  status               SubscriptionStatus @default(TRIAL)
+  asaasSubscriptionId  String?            @unique
+  
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  extendedUntil        DateTime?          // Data final estendida por prorrogação
+  
+  blockedAt            DateTime?
+  blockedReason        String?
+  
+  canceledAt           DateTime?
+  metadata             Json?
+  
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  customer             Customer           @relation(fields: [customerId], references: [id])
+  plan                 Plan               @relation(fields: [planId], references: [id])
+  invoices             Invoice[]
+  blockHistory         SubscriptionBlock[]
+  extensionHistory     SubscriptionExtension[]
+
+  @@index([customerId])
+  @@index([status])
+}
+
+model Invoice {
+  id              String          @id @default(uuid())
+  subscriptionId  String?
+  customerId      String
+  amount          Decimal         @db.Decimal(10, 2)
+  currency        String          @default("BRL")
+  status          InvoiceStatus   @default(PENDING)
+  paymentMethod   PaymentMethod?
+  dueDate         DateTime
+  paidAt          DateTime?
+  asaasPaymentId  String?         @unique // ID da cobrança no Asaas
+  metadata        Json?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  subscription    Subscription?   @relation(fields: [subscriptionId], references: [id])
+  customer        Customer        @relation(fields: [customerId], references: [id])
+
+  @@index([customerId])
+  @@index([status])
+}
+
+model WebhookEvent {
+  id               String         @id @default(uuid())
+  source           WebhookSource
+  eventType        String         // ex: "PAYMENT_RECEIVED"
+  asaasEventId     String         @unique // Para garantir idempotência
+  payload          Json
+  processedAt      DateTime?
+  processingStatus WebhookStatus  @default(PENDING)
+  errorMessage     String?
+  createdAt        DateTime       @default(now())
+
+  @@index([processingStatus])
+  @@index([asaasEventId])
+}
+
+model SubscriptionBlock {
+  id             String       @id @default(uuid())
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  reason         String
+  blockedBy      String?      // ← Este campo PRECISA existir
+  createdAt      DateTime     @default(now())
+
+  @@index([subscriptionId])
+}
+
+model SubscriptionExtension {
+  id                String       @id @default(uuid())
+  subscriptionId    String
+  subscription      Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  days              Int
+  reason            String?      // ← PRECISA TER O "?"
+  extendedBy        String?
+  previousPeriodEnd DateTime
+  newPeriodEnd      DateTime
+  createdAt         DateTime     @default(now())
+
+  @@index([subscriptionId])
+}
